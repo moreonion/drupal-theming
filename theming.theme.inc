@@ -6,15 +6,48 @@
  */
 
 /**
- * Returns HTML for a form element.
+ * Preprocess variables for form_element.
  *
- * Each form element is wrapped in a DIV container having the following CSS
- * classes:
+ * Add needed default values and the following classes for the DIV container:
  * - form-item: Generic for all form elements.
  * - form-type-#type: The internal element #type.
  * - form-item-#name: The internal form element #name (usually derived from the
  *   $form structure and set via form_builder()).
  * - form-disabled: Only set if the form element is #disabled.
+ */
+function theming_preprocess_form_element(&$variables) {
+  $element = &$variables['element'];
+
+  // This function is invoked as theme wrapper, but the rendered form element
+  // may not necessarily have been processed by form_builder().
+  $element += array(
+    '#title_display' => 'before',
+    '#wrapper_attributes' => [],
+  );
+  // Add element #id for #type 'item'.
+  if (isset($element['#markup']) && !empty($element['#id'])) {
+    $element['#wrapper_attributes']['id'] = $element['#id'];
+  }
+  // Add element's #type and #name as class to aid with JS/CSS selectors.
+  $element['#wrapper_attributes']['class'][] = 'form-item';
+  if (!empty($element['#type'])) {
+    $element['#wrapper_attributes']['class'][] = 'form-type-' . strtr($element['#type'], '_', '-');
+  }
+  if (!empty($element['#name'])) {
+    $element['#wrapper_attributes']['class'][] = 'form-item-' . strtr($element['#name'], array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
+  }
+  // Add a class for disabled elements to facilitate cross-browser styling.
+  if (!empty($element['#attributes']['disabled'])) {
+    $element['#wrapper_attributes']['class'][] = 'form-disabled';
+  }
+}
+
+
+/**
+ * Returns HTML for a form element.
+ *
+ * Each form element is wrapped in a DIV container having with attributes from
+ * #wrapper_attributes.
  *
  * In addition to the element itself, the DIV contains a label for the element
  * based on the optional #title_display property, and an optional #description.
@@ -54,29 +87,7 @@
 function theming_form_element($variables) {
   $element = &$variables['element'];
 
-  // This function is invoked as theme wrapper, but the rendered form element
-  // may not necessarily have been processed by form_builder().
-  $element += array(
-    '#title_display' => 'before',
-  );
-
-  // Add element #id for #type 'item'.
-  if (isset($element['#markup']) && !empty($element['#id'])) {
-    $attributes['id'] = $element['#id'];
-  }
-  // Add element's #type and #name as class to aid with JS/CSS selectors.
-  $attributes['class'] = array('form-item', 'theming-form-item');
-  if (!empty($element['#type'])) {
-    $attributes['class'][] = 'form-type-' . strtr($element['#type'], '_', '-');
-  }
-  if (!empty($element['#name'])) {
-    $attributes['class'][] = 'form-item-' . strtr($element['#name'], array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
-  }
-  // Add a class for disabled elements to facilitate cross-browser styling.
-  if (!empty($element['#attributes']['disabled'])) {
-    $attributes['class'][] = 'form-disabled';
-  }
-  $output = '<div' . drupal_attributes($attributes) . '>' . "\n";
+  $output = '<div' . drupal_attributes($element['#wrapper_attributes']) . '>' . "\n";
 
   // If #title is not set, we don't display any label or required marker.
   if (!isset($element['#title'])) {
