@@ -21,4 +21,5 @@ function theming_theme_registry_alter(&$hooks) {
   $hooks['form_element_label']['file'] = 'theming.theme.inc';
   $hooks['form_element_label']['includes'][] = $path . '/theming.theme.inc';
   $hooks['form_element_label']['function'] = 'theming_form_element_label';
+  $hooks['form_element_label']['preprocess functions'][] = 'theming_preprocess_form_element_label';
 }

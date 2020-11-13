@@ -125,6 +125,27 @@ function theming_form_element($variables) {
 }
 
 /**
+ * Preprocess variables for the form_element_label.
+ */
+function theming_preprocess_form_element_label(&$variables) {
+  $element = &$variables['element'];
+  $element += [
+    '#label_attributes' => [],
+  ];
+  // Style the label as class option to display inline with the element.
+  if ($element['#title_display'] == 'after') {
+    $element['#label_attributes']['class'][] = 'option';
+  }
+  // Show label only to screen readers to avoid disruption in visual flows.
+  elseif ($element['#title_display'] == 'invisible') {
+    $element['#label_attributes']['class'][] = 'element-invisible';
+  }
+  if (!empty($element['#id'])) {
+    $element['#label_attributes']['for'] = $element['#id'];
+  }
+}
+
+/**
  * Returns HTML for a form element label and required marker.
  *
  * Form element labels include the #title and a #required marker. The label is
@@ -162,20 +183,7 @@ function theming_form_element_label($variables) {
 
   $title = filter_xss_admin($element['#title']);
 
-  $attributes = array();
-  // Style the label as class option to display inline with the element.
-  if ($element['#title_display'] == 'after') {
-    $attributes['class'] = 'option';
-  }
-  // Show label only to screen readers to avoid disruption in visual flows.
-  elseif ($element['#title_display'] == 'invisible') {
-    $attributes['class'] = 'element-invisible';
-  }
-
-  if (!empty($element['#id'])) {
-    $attributes['for'] = $element['#id'];
-  }
 
   // The leading whitespace helps visually separate fields from inline labels.
-  return ' <label' . drupal_attributes($attributes) . '>' . $t('!title !required', array('!title' => $title, '!required' => $required)) . "</label>\n";
+  return ' <label' . drupal_attributes($element['#label_attributes']) . '>' . $t('!title !required', array('!title' => $title, '!required' => $required)) . "</label>\n";
 }
