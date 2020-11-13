@@ -10,16 +10,21 @@
  */
 function theming_theme_registry_alter(&$hooks) {
   $path = drupal_get_path('module', 'theming');
-
-  $hooks['form_element']['theme path'] = $path;
-  $hooks['form_element']['file'] = 'theming.theme.inc';
-  $hooks['form_element']['includes'][] = $path . '/theming.theme.inc';
-  $hooks['form_element']['function'] = 'theming_form_element';
-  $hooks['form_element']['preprocess functions'][] = 'theming_preprocess_form_element';
-
-  $hooks['form_element_label']['theme path'] = $path;
-  $hooks['form_element_label']['file'] = 'theming.theme.inc';
-  $hooks['form_element_label']['includes'][] = $path . '/theming.theme.inc';
-  $hooks['form_element_label']['function'] = 'theming_form_element_label';
-  $hooks['form_element_label']['preprocess functions'][] = 'theming_preprocess_form_element_label';
+  $file = 'theming.theme.inc';
+  $override = [
+    'form_element',
+    'form_element_label',
+  ];
+  foreach ($override as $name) {
+    $hook = &$hooks[$name];
+    $hook['theme path'] = $path;
+    $hook['file'] = $file;
+    $hook['includes'][] = "$path/$file";
+    $hook['function'] = "theming_$name";
+    // Depending on whether theming.theme.inc was included already the
+    // prepocess function might have been detected automatically.
+    // Make sure it’s added exactly once.
+    $hook['preprocess functions'][] = "theming_preprocess_$name";
+    $hook['preprocess functions'] = array_unique($hook['preprocess functions']);
+  }
 }
