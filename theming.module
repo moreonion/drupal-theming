@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for the theming module.
+ */
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function theming_theme_registry_alter(&$hooks) {
+  $path = drupal_get_path('module', 'theming');
+  $hooks['form_element']['theme path'] = $path;
+  $hooks['form_element']['file'] = 'theming.theme.inc';
+  $hooks['form_element']['includes'][] = $path . '/theming.theme.inc';
+  $hooks['form_element']['function'] = 'theming_form_element';
+}

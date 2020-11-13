@@ -1,0 +1,4 @@
+title = Improved Drupal7 theming
+description = Override some core theme functions to make them more extensible
+core = 7.x
+php = 7.3
