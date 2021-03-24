@@ -40,6 +40,16 @@ function theming_preprocess_form_element(&$variables) {
   if (!empty($element['#attributes']['disabled'])) {
     $element['#wrapper_attributes']['class'][] = 'form-disabled';
   }
+
+  if ($classes = $element['#attributes']['class'] ?? NULL) {
+    $element['#attributes']['class'] = array_combine($classes, $classes);
+  }
+  if ($classes = $element['#wrapper_attributes']['class'] ?? NULL) {
+    $element['#wrapper_attributes']['class'] = array_combine($classes, $classes);
+  }
+  if ($classes = $element['#label_attributes']['class'] ?? NULL) {
+    $element['#label_attributes']['class'] = array_combine($classes, $classes);
+  }
 }
 
 
