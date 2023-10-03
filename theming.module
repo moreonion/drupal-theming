@@ -17,10 +17,13 @@ function theming_theme_registry_alter(&$hooks) {
   ];
   foreach ($override as $name) {
     $hook = &$hooks[$name];
-    $hook['theme path'] = $path;
-    $hook['file'] = $file;
+    // Only replace the theme function when no theme overrides it.
+    if ($hook['function'] == "theme_$name") {
+      $hook['theme path'] = $path;
+      $hook['file'] = $file;
+      $hook['function'] = "theming_$name";
+    }
     $hook['includes'][] = "$path/$file";
-    $hook['function'] = "theming_$name";
     // Depending on whether theming.theme.inc was included already the
     // prepocess function might have been detected automatically.
     // Make sure it’s added exactly once.
