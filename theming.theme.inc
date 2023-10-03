@@ -23,7 +23,9 @@ function theming_preprocess_form_element(&$variables) {
   $element += array(
     '#title_display' => 'before',
     '#wrapper_attributes' => [],
+    '#description_attributes' => [],
   );
+  $element['#description_attributes'] += ['class' => ['description']];
   // Add element #id for #type 'item'.
   if (isset($element['#markup']) && !empty($element['#id'])) {
     $element['#wrapper_attributes']['id'] = $element['#id'];
@@ -49,6 +51,9 @@ function theming_preprocess_form_element(&$variables) {
   }
   if ($classes = $element['#label_attributes']['class'] ?? NULL) {
     $element['#label_attributes']['class'] = array_combine($classes, $classes);
+  }
+  if ($classes = $element['#description_attributes']['class'] ?? NULL) {
+    $element["#description_attributes"]['class'] = array_combine($classes, $classes);
   }
 }
 
@@ -126,7 +131,7 @@ function theming_form_element($variables) {
   }
 
   if (!empty($element['#description'])) {
-    $output .= '<div class="description">' . $element['#description'] . "</div>\n";
+    $output .= '<div' . drupal_attributes($element['#description_attributes']) . '>' . $element['#description'] . "</div>\n";
   }
 
   $output .= "</div>\n";
