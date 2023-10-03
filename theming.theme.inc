@@ -22,8 +22,11 @@ function theming_preprocess_form_element(&$variables) {
   // may not necessarily have been processed by form_builder().
   $element += array(
     '#title_display' => 'before',
+    '#wrapper_enabled' => TRUE,
     '#wrapper_attributes' => [],
+    '#description_attributes' => [],
   );
+  $element['#description_attributes'] += ['class' => ['description']];
   // Add element #id for #type 'item'.
   if (isset($element['#markup']) && !empty($element['#id'])) {
     $element['#wrapper_attributes']['id'] = $element['#id'];
@@ -49,6 +52,9 @@ function theming_preprocess_form_element(&$variables) {
   }
   if ($classes = $element['#label_attributes']['class'] ?? NULL) {
     $element['#label_attributes']['class'] = array_combine($classes, $classes);
+  }
+  if ($classes = $element['#description_attributes']['class'] ?? NULL) {
+    $element["#description_attributes"]['class'] = array_combine($classes, $classes);
   }
 }
 
@@ -96,8 +102,7 @@ function theming_preprocess_form_element(&$variables) {
  */
 function theming_form_element($variables) {
   $element = &$variables['element'];
-
-  $output = '<div' . drupal_attributes($element['#wrapper_attributes']) . '>' . "\n";
+  $output = '';
 
   // If #title is not set, we don't display any label or required marker.
   if (!isset($element['#title'])) {
@@ -126,11 +131,11 @@ function theming_form_element($variables) {
   }
 
   if (!empty($element['#description'])) {
-    $output .= '<div class="description">' . $element['#description'] . "</div>\n";
+    $output .= '<div' . drupal_attributes($element['#description_attributes']) . '>' . $element['#description'] . "</div>\n";
   }
-
-  $output .= "</div>\n";
-
+  if ($element['#wrapper_enabled']) {
+    $output = '<div' . drupal_attributes($element['#wrapper_attributes']) . '>' . "\n" . $output . "</div>\n";
+  }
   return $output;
 }
 
@@ -150,7 +155,15 @@ function theming_preprocess_form_element_label(&$variables) {
   elseif ($element['#title_display'] == 'invisible') {
     $element['#label_attributes']['class'][] = 'element-invisible';
   }
-  if (!empty($element['#id'])) {
+
+  // Use the element's ID as the default value of the "for" attribute (to
+  // associate the label with this form element), but allow this to be
+  // overridden in order to associate the label with a different form element
+  // instead.
+  if (!empty($element['#label_for'])) {
+    $element['#label_attributes']['for'] = $element['#label_for'];
+  }
+  elseif (!empty($element['#id'])) {
     $element['#label_attributes']['for'] = $element['#id'];
   }
 }
