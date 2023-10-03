@@ -22,6 +22,7 @@ function theming_preprocess_form_element(&$variables) {
   // may not necessarily have been processed by form_builder().
   $element += array(
     '#title_display' => 'before',
+    '#wrapper_enabled' => TRUE,
     '#wrapper_attributes' => [],
     '#description_attributes' => [],
   );
@@ -101,8 +102,7 @@ function theming_preprocess_form_element(&$variables) {
  */
 function theming_form_element($variables) {
   $element = &$variables['element'];
-
-  $output = '<div' . drupal_attributes($element['#wrapper_attributes']) . '>' . "\n";
+  $output = '';
 
   // If #title is not set, we don't display any label or required marker.
   if (!isset($element['#title'])) {
@@ -133,9 +133,9 @@ function theming_form_element($variables) {
   if (!empty($element['#description'])) {
     $output .= '<div' . drupal_attributes($element['#description_attributes']) . '>' . $element['#description'] . "</div>\n";
   }
-
-  $output .= "</div>\n";
-
+  if ($element['#wrapper_enabled']) {
+    $output = '<div' . drupal_attributes($element['#wrapper_attributes']) . '>' . "\n" . $output . "</div>\n";
+  }
   return $output;
 }
 
