@@ -31,3 +31,27 @@ function theming_theme_registry_alter(&$hooks) {
     $hook['preprocess functions'] = array_unique($hook['preprocess functions']);
   }
 }
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function theming_element_info_alter(&$info) {
+  $info['scripts']['#pre_render'] = ['theming_pre_render_scripts'];
+}
+
+/**
+ * Wrap drupal_pre_render_scripts() to add custom attributes to script tags.
+ */
+function theming_pre_render_scripts(array $elements) {
+  $processed_elements = drupal_pre_render_scripts($elements);
+  foreach (element_children($processed_elements['scripts']) as $index) {
+    // Skip aggregated scripts.
+    if (is_string($processed_elements['scripts'][$index])) {
+      continue;
+    }
+    $attributes = &$processed_elements['scripts'][$index]['#attributes'];
+    $custom_attributes = $elements['#items'][$attributes['src']]['attributes'] ?? [];
+    $attributes = $custom_attributes + $attributes;
+  }
+  return $processed_elements;
+}
