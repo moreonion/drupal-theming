@@ -50,8 +50,10 @@ function theming_pre_render_scripts(array $elements) {
       continue;
     }
     $attributes = &$processed_elements['scripts'][$index]['#attributes'];
-    $custom_attributes = $elements['#items'][$attributes['src']]['attributes'] ?? [];
-    $attributes = $custom_attributes + $attributes;
+    if ($src = $attributes['src'] ?? NULL) {
+      $custom_attributes = $elements['#items'][$src]['attributes'] ?? [];
+      $attributes = $custom_attributes + $attributes;
+    }
   }
   return $processed_elements;
 }
