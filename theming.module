@@ -36,7 +36,10 @@ function theming_theme_registry_alter(&$hooks) {
  * Implements hook_element_info_alter().
  */
 function theming_element_info_alter(&$info) {
-  $info['scripts']['#pre_render'] = ['theming_pre_render_scripts'];
+  // Replace the default #pre_render callback for scripts.
+  $info['scripts']['#pre_render'] = array_map(function ($hook) {
+    return $hook == 'drupal_pre_render_scripts' ? 'theming_pre_render_scripts' : $hook;
+  }, $info['scripts']['#pre_render']);
 }
 
 /**
