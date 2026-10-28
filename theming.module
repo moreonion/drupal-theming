@@ -46,17 +46,39 @@ function theming_element_info_alter(&$info) {
  * Wrap drupal_pre_render_scripts() to add custom attributes to script tags.
  */
 function theming_pre_render_scripts(array $elements) {
+  $attributes_by_src = [];
+  $attributes_by_hash = [];
+  foreach ($elements['#items'] as $item) {
+    $attributes = $item['attributes'] ?? [];
+    switch ($item['type']) {
+      case 'external':
+      case 'file':
+        $attributes_by_src[$item['data']] = $attributes;
+        break;
+      case 'inline':
+        $hash = hash('crc32', $item['data']);
+        $attributes_by_hash[$hash] = $attributes;
+        break;
+      default:
+        // Skip other types.
+        break;
+    }
+  }
   $processed_elements = drupal_pre_render_scripts($elements);
   foreach (element_children($processed_elements['scripts']) as $index) {
+    $item = &$processed_elements['scripts'][$index];
     // Skip aggregated scripts.
-    if (is_string($processed_elements['scripts'][$index])) {
+    if (is_string($item)) {
       continue;
     }
-    $attributes = &$processed_elements['scripts'][$index]['#attributes'];
-    if ($src = $attributes['src'] ?? NULL) {
-      $custom_attributes = $elements['#items'][$src]['attributes'] ?? [];
-      $attributes = $custom_attributes + $attributes;
+    $custom_attributes = [];
+    if ($src = $item['#attributes']['src'] ?? NULL) {
+      $custom_attributes = $attributes_by_src[$src] ?? [];
     }
+    elseif ($value = $item['#value'] ?? NULL) {
+      $custom_attributes = $attributes_by_hash[hash('crc32', $value)] ?? [];
+    }
+    $item['#attributes'] = $custom_attributes + $item['#attributes'];
   }
   return $processed_elements;
 }
